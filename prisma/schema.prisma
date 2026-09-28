@@ -1,0 +1,48 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Habit {
+  id        String   @id @default(uuid())
+  name      String
+  createdAt DateTime @default(now())
+
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id])
+
+  frequencyType  String
+  frequencyDays  Int[]
+  frequencyCount Int?
+
+  completions Completion[]
+
+  @@map("habits")
+}
+
+model Category {
+  id     String  @id @default(uuid())
+  name   String
+  habits Habit[]
+
+  @@map("categories")
+}
+
+model Completion {
+  id      String @id @default(uuid())
+  date    DateTime @db.Date
+  habitId String
+  habit   Habit    @relation(fields: [habitId], references: [id], onDelete: Cascade)
+
+  @@unique([habitId, date])
+  @@map("completions")
+}
