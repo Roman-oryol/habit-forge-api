@@ -15,7 +15,7 @@ datasource db {
 enum FrequencyType {
   daily
   weekdays
-  timePerWeek
+  timesPerWeek
 }
 
 model Habit {
