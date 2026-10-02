@@ -1,7 +1,7 @@
 import express from 'express';
 import { prisma } from './lib/prisma.js';
 import { fromFrequency, toHabitResponse } from './mappers/habit.js';
-import { createHabitSchema } from './schemas/habit.js';
+import { createHabitSchema, updateHabitSchema } from './schemas/habit.js';
 
 const app = express();
 app.use(express.json());
@@ -53,6 +53,40 @@ app.delete('/habits/:id', async (req, res) => {
 
   await prisma.habit.delete({ where: { id } });
   return res.status(204).send();
+});
+
+app.patch('/habits/:id', async (req, res) => {
+  const id = req.params.id;
+  const result = updateHabitSchema.safeParse(req.body);
+  if (!result.success) {
+    return res.status(400).json({ error: result.error.issues });
+  }
+
+  const { frequency, ...rest } = result.data;
+  const data = {
+    ...rest,
+    ...(frequency ? fromFrequency(frequency) : {}),
+  };
+
+  try {
+    const updatedHabit = await prisma.habit.update({
+      where: { id },
+      data,
+      include: { completions: true },
+    });
+
+    return res.status(200).json(toHabitResponse(updatedHabit));
+  } catch (error) {
+    if (
+      typeof error === 'object' &&
+      error !== null &&
+      'code' in error &&
+      error.code === 'P2025'
+    ) {
+      return res.status(404).json({ error: 'Habit not found' });
+    }
+    throw error;
+  }
 });
 
 app.listen(3000, () => {
