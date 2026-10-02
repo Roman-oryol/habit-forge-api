@@ -12,6 +12,12 @@ datasource db {
   provider = "postgresql"
 }
 
+enum FrequencyType {
+  daily
+  weekdays
+  timePerWeek
+}
+
 model Habit {
   id        String   @id @default(uuid())
   name      String
@@ -20,7 +26,7 @@ model Habit {
   categoryId String
   category   Category @relation(fields: [categoryId], references: [id])
 
-  frequencyType  String
+  frequencyType  FrequencyType
   frequencyDays  Int[]
   frequencyCount Int?
 
