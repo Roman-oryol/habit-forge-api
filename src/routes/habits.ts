@@ -1,7 +1,11 @@
 import { Router } from 'express';
 import { prisma } from '../lib/prisma.js';
 import { fromFrequency, toHabitResponse } from '../mappers/habit.js';
-import { createHabitSchema, updateHabitSchema } from '../schemas/habit.js';
+import {
+  createHabitSchema,
+  toggleHabitSchema,
+  updateHabitSchema,
+} from '../schemas/habit.js';
 
 export const habitsRouter = Router();
 
@@ -77,6 +81,43 @@ habitsRouter.patch('/:id', async (req, res) => {
     return res.status(200).json(toHabitResponse(updatedHabit));
   } catch (error) {
     if (isPrismaError(error) && error.code === 'P2025') {
+      return res.status(404).json({ error: 'Habit not found' });
+    }
+    throw error;
+  }
+});
+
+habitsRouter.post('/:id/toggle', async (req, res) => {
+  const habitId = req.params.id;
+  const validateResult = toggleHabitSchema.safeParse(req.body);
+
+  if (!validateResult.success) {
+    return res.status(400).json({ error: validateResult.error.issues });
+  }
+
+  const { date } = validateResult.data;
+
+  try {
+    const result = await prisma.$transaction(async (tx) => {
+      const existing = await tx.completion.findUnique({
+        where: { habitId_date: { habitId, date: new Date(date) } },
+      });
+
+      if (existing) {
+        await tx.completion.delete({ where: { id: existing.id } });
+      } else {
+        await tx.completion.create({ data: { habitId, date: new Date(date) } });
+      }
+
+      return tx.habit.findUnique({
+        where: { id: habitId },
+        include: { completions: true },
+      });
+    });
+
+    return res.status(200).json(toHabitResponse(result!));
+  } catch (error) {
+    if (isPrismaError(error) && error.code === 'P2003') {
       return res.status(404).json({ error: 'Habit not found' });
     }
     throw error;

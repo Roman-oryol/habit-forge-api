@@ -16,3 +16,5 @@ export const createHabitSchema = z.object({
 });
 
 export const updateHabitSchema = createHabitSchema.partial();
+
+export const toggleHabitSchema = z.object({ date: z.string() });
