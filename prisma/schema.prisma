@@ -23,8 +23,8 @@ model Habit {
   name      String
   createdAt DateTime @default(now())
 
-  categoryId String
-  category   Category @relation(fields: [categoryId], references: [id])
+  categoryId String?
+  category   Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
 
   frequencyType  FrequencyType
   frequencyDays  Int[]
