@@ -4,11 +4,12 @@ import { habitsRouter } from './routes/habits.js';
 import { categoriesRouter } from './routes/categories.js';
 
 const PORT = process.env.PORT ?? 3000;
+const FRONTEND_URL = process.env.FRONTEND_URL ?? 'http://localhost:5173';
 
 const app = express();
 app.use(
   cors({
-    origin: ['http://localhost:5173', 'https://habit-forge-alpha.vercel.app'],
+    origin: [FRONTEND_URL],
   }),
 );
 app.use(express.json());
