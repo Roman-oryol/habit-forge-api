@@ -52,3 +52,12 @@ model Completion {
   @@unique([habitId, date])
   @@map("completions")
 }
+
+model User {
+  id       String @id @default(uuid())
+  email    String @unique
+  passwordHash String
+  createdAt DateTime @default(now())
+
+  @@map("users")
+}
