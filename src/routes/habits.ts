@@ -6,12 +6,9 @@ import {
   toggleHabitSchema,
   updateHabitSchema,
 } from '../schemas/habit.js';
+import { isPrismaError } from '../lib/errors.js';
 
 export const habitsRouter = Router();
-
-export function isPrismaError(error: unknown): error is { code: string } {
-  return typeof error === 'object' && error !== null && 'code' in error;
-}
 
 habitsRouter.get('/', async (req, res) => {
   const habits = await prisma.habit.findMany({

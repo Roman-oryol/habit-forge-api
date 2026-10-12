@@ -4,7 +4,7 @@ import {
   createCategorySchema,
   updateCategorySchema,
 } from '../schemas/category.js';
-import { isPrismaError } from './habits.js';
+import { isPrismaError } from '../lib/errors.js';
 
 export const categoriesRouter = Router();
 
