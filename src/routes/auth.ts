@@ -6,6 +6,7 @@ import { isPrismaError } from '../lib/errors.js';
 import { prisma } from '../lib/prisma.js';
 import { toUserResponse } from '../mappers/user.js';
 import { JWT_SECRET } from '../config.js';
+import { requireAuth } from '../middleware/auth.js';
 
 export const authRouter = Router();
 
@@ -61,4 +62,16 @@ authRouter.post('/login', async (req, res) => {
     expiresIn: '1h',
   });
   return res.json({ token, user: toUserResponse(user) });
+});
+
+authRouter.get('/me', requireAuth, async (req, res) => {
+  const user = await prisma.user.findUnique({
+    where: { id: req.userId },
+  });
+
+  if (!user) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  return res.json(toUserResponse(user));
 });

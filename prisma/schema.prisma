@@ -26,12 +26,16 @@ model Habit {
   categoryId String?
   category   Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
 
+  userId String
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   frequencyType  FrequencyType
   frequencyDays  Int[]
   frequencyCount Int?
 
   completions Completion[]
 
+  @@index([userId])
   @@map("habits")
 }
 
@@ -40,6 +44,10 @@ model Category {
   name   String
   habits Habit[]
 
+  userId String
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
   @@map("categories")
 }
 
@@ -58,6 +66,10 @@ model User {
   email    String @unique
   passwordHash String
   createdAt DateTime @default(now())
+
+  habits Habit[]
+  categories Category[]
+
 
   @@map("users")
 }
